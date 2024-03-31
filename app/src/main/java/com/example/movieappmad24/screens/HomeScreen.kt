@@ -51,10 +51,12 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import com.example.movieappmad24.models.Movie
 import com.example.movieappmad24.models.getMovies
+import com.example.movieappmad24.navigation.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -70,32 +72,45 @@ fun HomeScreen(navController: NavController) {
             )
         },
         bottomBar = {
-            NavigationBar {
-                NavigationBarItem(
-                    label = { Text("Home") },
-                    selected = true,
-                    onClick = { /*TODO*/ },
-                    icon = { Icon(
-                        imageVector = Icons.Filled.Home,
-                        contentDescription = "Go to home"
-                    )}
-                )
-                NavigationBarItem(
-                    label = { Text("Watchlist") },
-                    selected = false,
-                    onClick = { /*TODO*/ },
-                    icon = { Icon(
-                        imageVector = Icons.Filled.Star,
-                        contentDescription = "Go to watchlist"
-                    )}
-                )
-            }
+            BottomBar(navController = navController)
         }
     ){ innerPadding ->
         MovieList(
             modifier = Modifier.padding(innerPadding),
             movies = getMovies(),
             navController = navController
+        )
+    }
+}
+
+@Composable
+fun BottomBar(navController: NavController) {
+    val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+
+    NavigationBar {
+        NavigationBarItem(
+            icon = { Icon(Icons.Filled.Home, contentDescription = "Home") },
+            label = { Text("Home") },
+            selected = currentRoute == Screen.HomeScreen.route,
+            onClick = {
+                // Navigate to HomeScreen
+                navController.navigate(Screen.HomeScreen.route) {
+                    popUpTo(navController.graph.startDestinationId)
+                    launchSingleTop = true
+                }
+            }
+        )
+        NavigationBarItem(
+            icon = { Icon(Icons.Filled.Star, contentDescription = "Watchlist") },
+            label = { Text("Watchlist") },
+            selected = currentRoute == Screen.Watchlist.route,
+            onClick = {
+                // Navigate to WatchlistScreen
+                navController.navigate(Screen.Watchlist.route) {
+                    popUpTo(navController.graph.startDestinationId)
+                    launchSingleTop = true
+                }
+            }
         )
     }
 }
